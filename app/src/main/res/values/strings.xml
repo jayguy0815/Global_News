@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">GlobalGames</string>
+    <string name="error">錯誤</string>
+    <string name="error_message">連線錯誤，請稍後再試</string>
 </resources>

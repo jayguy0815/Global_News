@@ -1,43 +1,75 @@
 package com.jayguy.globalnews
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.jayguy.globalnews.ui.theme.GlobalNewsTheme
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.jayguy.globalnews.ui.detail.DetailFragment
+import com.jayguy.globalnews.ui.home.HomeFragment
+import com.jayguy.globalnews.ui.theme.GlobalGameTheme
+import com.jayguy.globalnews.utils.Injection.DETAIL_ARG_GAMES_ID
+import com.jayguy.globalnews.utils.Route
+import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * Created by Leo on 2022/11/8.
+ */
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GlobalNewsTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                }
+            GlobalGameTheme {
+                GlobalGameScreen()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun GlobalGameScreen() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = Route.Home.route,
+    ) {
+        composable(route = Route.Home.route) {
+            HomeFragment(
+                onClickToDetailScreen = { gamesId ->
+                    navController.navigate(
+                        Route.Detail.createRoute(gamesId)
+                    )
+                }
+            )
+        }
+        composable(
+            route = Route.Detail.route,
+            arguments = listOf(
+                navArgument(DETAIL_ARG_GAMES_ID){
+                    type = NavType.IntType
+                }
+            )
+        ) { backStackEntry ->
+            val gamesId = backStackEntry.arguments?.getInt(DETAIL_ARG_GAMES_ID)
+            requireNotNull(gamesId) { "gamesId parameter wasn't found. Please make sure it's set!" }
+            DetailFragment(id = gamesId)
+        }
+    }
 }
 
 @Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun DefaultPreview() {
-    GlobalNewsTheme {
-        Greeting("Android")
+fun JetpackComposeAppScreenPreview() {
+    GlobalGameTheme {
+        GlobalGameScreen()
     }
 }
